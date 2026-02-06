@@ -52,7 +52,7 @@ pip install -r requirements.txt
 
 ---
 🚀 Step 5: Run the Streamlit App
-Ensure NLSQL_Backend.py contains the Private IP of your HeatWave instance.
+Ensure NLSQL_V2.py contains the Private IP of your HeatWave instance.
 
 Launch the application:
 streamlit run newApp.py
