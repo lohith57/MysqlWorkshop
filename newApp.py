@@ -166,6 +166,7 @@ with chat_container:
                 # D. STORE HISTORY
                 st.session_state.chat_history.append({
                     "question": question,
+                    "canonical_question": rewritten_text,
                     "answer": answer
                 })
                 # Maintain memory limit

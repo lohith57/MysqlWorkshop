@@ -51,20 +51,44 @@ def rewrite_question(question: str, history: List[dict], app_username: str) -> s
 
         # REFINED PROMPT: Focus on preserving "How many" vs "What"
         prompt = f"""
-You are a precision rewriter for a SQL assistant.
-Conversation history:
+You are a CONTEXTUAL QUESTION REWRITER for a Natural Language → SQL system.
+
+Conversation history (for context only):
 {history_text}
 
-Current user question: "{question}"
+Current user question:
+"{question}"
 
-Task:
-Rewrite the question into a standalone, explicit instruction for a SQL generator.
-Rules:
-1. PRESERVE INTENT: If the user asks "How many", the rewrite MUST ask for a count/total. 
-2. PRESERVE INTENT: If the user asks "What" or "Which", the rewrite MUST ask for a list/details.
-3. RESOLVE: Change "here", "there", "them", or "delayed" based on the history.
-4. If the user mentions a time (e.g., "2 hrs"), keep that exact constraint.
-5. Output ONLY the rewritten question. No preamble.
+Your task:
+Rewrite the current user question into a SINGLE, standalone, clear NATURAL-LANGUAGE question that can be understood without the conversation history.
+
+STRICT RULES (VIOLATION = WRONG ANSWER):
+1. OUTPUT MUST BE PLAIN ENGLISH ONLY.
+2. DO NOT OUTPUT SQL.
+3. DO NOT use or mention table names, column names, schemas, or database objects.
+4. DO NOT use SQL keywords such as SELECT, FROM, WHERE, JOIN, GROUP BY, HAVING, ORDER BY, COUNT, SUM, etc.
+5. DO NOT format the output as code or markdown.
+6. Output exactly ONE sentence.
+
+INTENT PRESERVATION RULES:
+7. If the user asks “How many”, “Number of”, or “Count”, the rewritten question MUST ask for a count or total.
+8. If the user asks “Which”, “What”, or “List”, the rewritten question MUST ask for specific items or details.
+9. Preserve all filters such as locations, names, time ranges, and durations exactly as stated.
+10. Resolve references like “here”, “there”, “them”, “those”, or “delayed” using the conversation history.
+
+CONTEXT RULES:
+11. Use conversation history ONLY to resolve ambiguity — do NOT introduce new assumptions.
+12. Do NOT infer database schema or guess column meanings.
+13. If the current question is already standalone and clear, return it unchanged.
+
+FAIL-SAFE:
+14. If you are unsure or lack enough context, rewrite the question conservatively without adding details.
+
+FINAL OUTPUT:
+- Return ONLY the rewritten natural-language question.
+- No explanations.
+- No preamble.
+- No extra text.
 """
 
         query = "SELECT sys.ML_GENERATE(%s, JSON_OBJECT('task','generation','model_id','llama3.1-8b-instruct-v1'));"
