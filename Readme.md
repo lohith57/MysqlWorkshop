@@ -57,8 +57,8 @@ CREATE TABLE chat_history (
 ## 📦 Step 3: Install Dependencies
 pip3 install -r requirements.txt
 
-🐍 Step 4: Virtual Environment (Optional)
-# Create the environment
+## 🐍 Step 4: Virtual Environment (Optional)
+ Create the environment
 python3 -m venv nlvnv
 
 --Activate it
