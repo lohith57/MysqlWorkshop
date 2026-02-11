@@ -35,7 +35,23 @@ GRANT SELECT ON db_name.* TO 'user_name'@'%';
 -- Grant access to run HeatWave GenAI routines (sys.ML_GENERATE & sys.NL_SQL)
 GRANT EXECUTE ON sys.* TO 'user_name'@'%';
 
----
+---Example Data sets:
+data set :https://docs.oracle.com/en/cloud/paas/digital-assistant/tutorial-sql-dialogs/files/create_employee_db.txt
+
+--- Maintain Conversation History
+create database CONV_HISTORY
+CREATE USER 'chat_history'@'%' IDENTIFIED BY 'Strong#Password123';
+
+CREATE TABLE chat_history (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    session_id VARCHAR(64) NOT NULL,
+    user_question TEXT NOT NULL,          -- raw user input OR rewritten question
+    generated_sql TEXT,                   -- HeatWave output
+    answer TEXT NOT NULL,                 -- final assistant response
+    app_user VARCHAR(64) NOT NULL,         -- ora_userA, etc
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 
 ## 📦 Step 3: Install Dependencies
 pip3 install -r requirements.txt
@@ -52,7 +68,7 @@ pip install -r requirements.txt
 
 ---
 🚀 Step 5: Run the Streamlit App
-Ensure NLSQL_V2.py contains the Private IP of your HeatWave instance.
+Ensure NLSQL_Backend.py contains the Private IP of your HeatWave instance.
 
 Launch the application:
-streamlit run newApp.py
+streamlit run streamlit_app.py

@@ -2,6 +2,9 @@ import pandas as pd
 import mysql.connector
 import json
 from typing import List, Dict
+import random
+import string
+
 
 # ------------------------------------------------
 # DB CONNECTION BASE
@@ -9,6 +12,13 @@ from typing import List, Dict
 DB_BASE = {
     "host": "10.0.1.110",
     "port": 3306
+}
+SYSTEM_DB_CONFIG = {
+    "host": "10.0.1.110",
+    "port": 3306,
+    "user": "ChatHistory",
+    "password": "Chat@History#123",
+    "database": "CONV_HISTORY"
 }
 
 # ------------------------------------------------
@@ -222,3 +232,118 @@ Rules:
     finally:
         if cursor: cursor.close()
         if conn: conn.close()
+
+#------------------------------------------- 
+# GEENERATE SESSION TO STORE CHAT HISTORY
+# ------------------------------------------
+
+def generate_session_id(length=8):
+    chars = string.ascii_uppercase + string.digits
+    return ''.join(random.choices(chars, k=length))
+
+#---------------------------------------------
+# INSERT INTO CHAT HISTORY TABLE
+#---------------------------------------------
+def insert_chat_history(
+    session_id: str,
+    user_question: str,
+    generated_sql: str,
+    answer: str,
+    app_user: str
+):
+    conn = None
+    cursor = None
+
+    try:
+        conn = mysql.connector.connect(**SYSTEM_DB_CONFIG)
+        cursor = conn.cursor()
+
+        insert_stmt = """
+            INSERT INTO chat_history (
+                session_id,
+                user_question,
+                generated_sql,
+                answer,
+                app_user
+            )
+            VALUES (%s, %s, %s, %s, %s)
+        """
+
+        cursor.execute(
+            insert_stmt,
+            (
+                session_id,
+                user_question,
+                generated_sql,
+                answer,
+                app_user,
+            )
+        )
+
+        conn.commit()
+
+    except Exception as e:
+        conn.rollback()
+        raise e
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+#--------------------------------------
+# LOAD CHAT HISTORY
+#--------------------------------------
+def get_chat_sessions(app_user: str):
+    conn = mysql.connector.connect(**SYSTEM_DB_CONFIG)
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT
+            t.session_id,
+            t.user_question AS question,
+            t.created_at AS started_at,
+            cnt.message_count
+        FROM chat_history t
+        JOIN (
+            SELECT
+                session_id,
+                MIN(created_at) AS first_time,
+                COUNT(*) AS message_count
+            FROM chat_history
+            WHERE app_user = %s
+            GROUP BY session_id
+        ) cnt
+          ON t.session_id = cnt.session_id
+         AND t.created_at = cnt.first_time
+        ORDER BY t.created_at DESC
+    """, (app_user,))
+
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return rows
+
+#------------------------------------
+#DISPLAY CHAT HISTORY
+#-----------------------------------
+
+def get_chat_by_session(session_id: str):
+    conn = mysql.connector.connect(**SYSTEM_DB_CONFIG)
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT
+            user_question,
+            answer
+        FROM chat_history
+        WHERE session_id = %s
+        ORDER BY created_at ASC
+    """, (session_id,))
+
+    rows = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+    return rows
