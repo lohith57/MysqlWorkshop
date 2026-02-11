@@ -51,7 +51,8 @@ CREATE TABLE chat_history (
     app_user VARCHAR(64) NOT NULL,         -- ora_userA, etc
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
+```
+---
 
 ## 📦 Step 3: Install Dependencies
 pip3 install -r requirements.txt
@@ -67,7 +68,7 @@ source nlvnv/bin/activate
 pip install -r requirements.txt
 
 ---
-🚀 Step 5: Run the Streamlit App
+## 🚀 Step 5: Run the Streamlit App
 Ensure NLSQL_Backend.py contains the Private IP of your HeatWave instance.
 
 Launch the application:
