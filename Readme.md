@@ -42,6 +42,9 @@ data set :https://docs.oracle.com/en/cloud/paas/digital-assistant/tutorial-sql-d
 create database CONV_HISTORY
 CREATE USER 'chat_history'@'%' IDENTIFIED BY 'Strong#Password123';
 
+GRANT SELECT, INSERT, UPDATE, DELETE ON CONV_HISTORY.* TO 'chat_history'@'%';
+FLUSH PRIVILEGES;
+
 CREATE TABLE chat_history (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     session_id VARCHAR(64) NOT NULL,
@@ -68,8 +71,27 @@ source nlvnv/bin/activate
 pip install -r requirements.txt
 
 ---
-## 🚀 Step 5: Run the Streamlit App
+## Step 5: You will be required to make the following customizations
+
+In the db_metadata.py file:
+
+* Update `USER_DB_MAPPING`, you may add as many users as you like.
+
+* Add your specific `DB_HOST` and `DB_PORT`.
+
+In the NLSQL_V2.py file:
+
+* Update `DB_BASE` to point to your database.
+
+* Update the `SYSTEM_DB_CONFIG`, in which also add the user for chat_history you created in *step 1* above.
+
+* Here too, update `USER_DB_MAPPING` as as in the db_metadata.py file.
+
+## 🚀 Step 6: Run the Streamlit App and access it
 Ensure NLSQL_Backend.py contains the Private IP of your HeatWave instance.
 
-Launch the application:
-streamlit run streamlit_app.py
+Launch the application in background, you change the port to a port of your choice, 8504 here is an example:
+
+```nohup python streamlit run streamlitApp.py --server.address=0.0.0.0 server.port=8504 2>&1 &```
+
+To access the website, use the URL like so: http://XX.XX.XX.XX:8504
