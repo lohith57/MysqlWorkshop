@@ -124,7 +124,7 @@ st.markdown("### Region 2: Database Object Explorer")
 
 with st.expander("🔍 View Accessible Tables", expanded=True):
     try:
-        tables = get_accessible_tables(app_user)
+        tables = get_accessible_tables(app_user,selected_db)
         if tables:
             grid = st.columns(4)
             for i, t in enumerate(tables):

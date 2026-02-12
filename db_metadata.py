@@ -73,7 +73,7 @@ def get_accessible_databases(app_user):
 # ----------------------------------
 # Get tables user can access
 # ----------------------------------
-def get_accessible_tables(app_user):
+def get_accessible_tables(app_user,selected_db):
     conn = None
     cursor = None
 
@@ -85,6 +85,7 @@ def get_accessible_tables(app_user):
             SELECT table_schema, table_name
             FROM information_schema.tables
             WHERE table_type = 'BASE TABLE'
+              AND table_schema = %s
               AND table_schema NOT IN (
                   'mysql',
                   'information_schema',
@@ -92,7 +93,7 @@ def get_accessible_tables(app_user):
                   'sys'
               )
             ORDER BY table_schema, table_name;
-        """)
+        """,(selected_db,))
 
         return cursor.fetchall()
 
